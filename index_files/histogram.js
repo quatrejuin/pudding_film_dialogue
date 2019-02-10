@@ -909,26 +909,29 @@ function drawHistogram(){
 
         for (bucket in bucketElements){
 
-          var disneyElementsMove = disneyElements
-            .filter(function(d,i){
-              return leftAssign(d.female_percent) == bucketElements[bucket];
-            })
-            .sort(function(a, b){
-              return d3.ascending(+a.female_percent, +b.female_percent);
-            })
-            ;
+          // No use, should be deleted
+          // By Jason Wu
+          //
+          // var disneyElementsMove = disneyElements
+          //   .filter(function(d,i){
+          //     return leftAssign(d.female_percent) == bucketElements[bucket];
+          //   })
+          //   .sort(function(a, b){
+          //     return d3.ascending(+a.female_percent, +b.female_percent);
+          //   })
+          //   ;
 
-          disneyElementsMove
-            .transition()
-            .duration(0)
-            .style("left",function(d){
-              return width*((leftAssign(d.female_percent)-1)/3) + 10 + "px";
-            })
-            .style("top",function(d,i){
-              return i*12 - 10 + "px"
-            })
-            .style("height","0px")
-            ;
+          // disneyElementsMove
+          //   .transition()
+          //   .duration(0)
+          //   .style("left",function(d){
+          //     return width*((leftAssign(d.female_percent)-1)/3) + 10 + "px";
+          //   })
+          //   .style("top",function(d,i){
+          //     return i*12 - 10 + "px"
+          //   })
+          //   .style("height","0px")
+          //   ;
 
           var disneyElementsData = disneyElementsMove
             .append("div")
@@ -949,22 +952,21 @@ function drawHistogram(){
             .attr("class","film-element-column-container tk-futura-pt")
             ;
 
-          var maleBar = barContainer.append("div")
-            .attr("class","film-male-bar film-bar")
-            .style("background-color", function(d){
-              return disneyScaleMale(1-d.female_percent);
-            })
-            .style("width", function(d){
-              return 100*(1-d.female_percent) + "%";
-            })
-            ;
+          // var maleBar = barContainer.append("div")
+          //   .attr("class","film-male-bar film-bar")
+          //   .style("background-color", "rgb(36, 151, 251)")
+          //   .style("width", function(d){
+          //     return 100*(1-d.female_percent) + "%";
+          //   })
+          //   ;
 
-          var femaleBar = barContainer.append("div")
-            .attr("class","film-female-bar film-bar")
-            .style("background-color", function(d){
-              return disneyScaleFemale(d.female_percent);
-            })
-            ;
+          // var femaleBar = barContainer.append("div")
+          //   .attr("class","film-female-bar film-bar")
+          //   .style("background-color", "rgb(255, 51, 51)")
+          //   ;
+
+          let maleBar = d3.selectAll(".film-male-bar.film-bar").style("background-color", "rgb(33, 97, 250)")
+          let femaleBar = d3.selectAll(".film-female-bar.film-bar").style("background-color", "rgb(255, 51, 51)")
 
           var statContainer = disneyElementsData.append("div")
             .attr("class","film-stat-container tk-futura-pt")
@@ -1008,6 +1010,10 @@ function drawHistogram(){
 
         }
 
+        //
+        // New Disney char top
+        let newDisneyTop = 150
+        let newDisneyLeft = -65
         for (bucket in bucketElements){
 
           var disneyElementsMove = d3.selectAll("#disney-cell")
@@ -1023,10 +1029,10 @@ function drawHistogram(){
             .transition()
             .duration(0)
             .style("left",function(d){
-              return width*((leftAssign(d.female_percent)-1)/3) + 10 + "px";
+              return width*((leftAssign(d.female_percent)-1)/3) + 10 + newDisneyLeft + "px";
             })
             .style("top",function(d,i){
-              return i*12 - 10 + "px"
+              return i*12 - 10 + newDisneyTop + "px"
             })
             .style("width",width/3 + 10 + "px")
             .style("height","0px")
@@ -1034,10 +1040,165 @@ function drawHistogram(){
 
         }
 
+        if (parseInt(disneyAxis.style("top"))<200)
+        {
+        disneyAxis.style("top",function(d){
+          return parseInt(disneyAxis.style("top"))+newDisneyTop+"px"
+        })
+        .style("left",function(d){
+          return parseInt(disneyAxis.style("left"))+newDisneyLeft+"px"
+        });
+        }
+
+
+                    ///////////////////////////////////////
+                    // d3.selectAll("#disney-cell")
+                    // .transition()
+                    // .duration(500)
+                    // // .delay(500)
+                    // .select("div")
+                    // .style("opacity",0)
+                    // .transition()
+                    // .duration(0)
+                    // .style("opacity",null)
+                    // .style("visibility","hidden")
+                    // ;
+                  disneyAxis.style("visibility","visible");
+                  //d3.select(".histogram-two-script-container").style("visibility","visible");
+  
+                  var findingNemo = spectrumData.filter(function(d,i){
+                    return d.imdb_id == "tt0266543";
+                  })[0]
+                  ;
+
+                  let eachBinMap = []  
+                  d3.select(".star-chart-data").selectAll(".disney-dot")
+                    .data(spectrumData.filter(function(d){
+                      return disneyMap.has(d.imdb_id);
+                    }))
+                    .enter()
+                    .insert("div",":first-child")
+                    .attr("class","disney-dot")
+                    .style("background-color",function(d){
+                      var color = d3.rgb(colorScaleContinuous(d.female_percent));
+                      return color;
+                      // return "#fff";
+                    })
+                    .style("height","6px")
+                    .style("width","6px")
+                    .style("position","abosolute")
+                    .style("left",function(d){
+                      return Math.floor(cx(d.female_percent)) + "px";
+                    })
+                    .style("top",function(d,i){
+                      x = Math.floor(cx(d.female_percent))
+                      if (x in eachBinMap)
+                      {
+                        eachBinMap[x]++
+                      }
+                      else
+                      {
+                        eachBinMap[x]=0
+                      }
+                      return 20-eachBinMap[x]*7+ "px";
+                    })
+                    .style("margin-top","0px");
+
+                    d3.selectAll(".film-element, .disney-dot")
+                    .on("mouseover",function(d,i){
+                      var data = d,
+                          order = i,
+                          element = this;
+                      elementMouseover(element,data,order);
+                      d3.selectAll("#disney-cell").each(function(dd)
+                      {
+                        if (dd.imdb_id==d.imdb_id)
+                        {
+                          d3.select(this).style("background-color","#00000022")
+                          .style("height","15px")
+                        }
+                      })
+                    })
+                    .on("mouseout",function(d,i){
+                      var data = d,
+                          order = i,
+                          element = this;
+                      elementMouseout(element,data,order); 
+                      d3.selectAll("#disney-cell").each(function(dd)
+                      {
+                        if (dd.imdb_id==d.imdb_id)
+                        {
+                          d3.select(this).style("background-color","rgb(36, 151, 251)")
+                          .style("height","0px")
+                        }
+                      })
+                    })
+
+                  //   markerBubble
+                  //   .style("top","370px")
+                  //   .style("left",function(d){
+                  //     return Math.floor(cx(findingNemo.female_percent)) -3 + "px";
+                  //   })
+                  //   .transition()
+                  //   .duration(300)
+                  //   .delay(1000)
+                  //   .style("opacity",1)
+                  //   ;
+  
+                  // previewName.text(findingNemo.title);
+                  // previewData.data([findingNemo.female_percent,1-findingNemo.female_percent]).enter();
+  
+                  previewData.select(".histogram-two-data-preview-percent")
+                    .text(function(d,i){
+                      return percentFormat(d);
+                    });
+  
+                  previewData.select(".histogram-two-data-preview-bar")
+                    .transition()
+                    .duration(200)
+                    .style("width",function(d){
+                      return previewDataBarScale(d) + "px";
+                    });
+  
+  
+                  previewNameContainer
+                    .style("top","54px")
+                    .style("left","151px")
+                    .transition()
+                    .duration(0)
+                    .delay(800)
+                    .style("display","block")
+                    ;
+  
+                  markerFixed.transition().duration(0).style("opacity",null).style("display",null);
+                  previewNameContainerFixed.transition().duration(0).style("opacity",null).style("display",null);
+  
+                  var delayAmount = 0;
+                  var durationAmount = 0;
+                  let newTop = 0;
+
+                  histogramTwoAxis.style("opacity",0).style("visibility","visible").transition().duration(0).style("opacity",1).transition().duration(0).style("opacity",null);
+                  d3.select(".star-chart-axis").style("visibility","visible");
+
+                  femaleTop.transition().duration(durationAmount).delay(delayAmount).style("opacity",1).style("left",900 - 1 +"px").style("top",newTop+"px");
+                  maleTop.transition().duration(durationAmount).delay(delayAmount).style("opacity",1).style("top",newTop+"px");
+                  maleForty.transition().duration(durationAmount).delay(delayAmount).style("opacity",1).style("left",900*(0.4)+"px").style("top",newTop+"px");
+                  maleTen.transition().duration(durationAmount).delay(delayAmount).style("opacity",1).style("left",900*(0.1)+"px").style("top",newTop+"px");
+                  maleTwentyFive.transition().duration(durationAmount).delay(delayAmount).style("opacity",1).style("left",900*(0.25)+"px").style("top",newTop+"px");
+                  femaleSixty.transition().duration(durationAmount).delay(delayAmount).style("opacity",1).style("left",900*(0.6)+"px").style("top",newTop+"px");
+                  midPoint.transition().duration(durationAmount).delay(delayAmount).style("left",900*(0.5)+"px").style("top",newTop+"px");
+
+
+                  
+        
+                    ///////////////////////////////////////
+
 
       }
 
       function stageTwo(){
+        d3.selectAll(".disney-dot").remove()
+
         d3.select(".filters").style("visibility","visible");
         if(!mobile){
           d3.selectAll("#disney-cell").select("div").select("p").style("color","rgba(0,0,0,0)").style("width","0px");
@@ -1200,6 +1361,8 @@ function drawHistogram(){
       }
 
       function stageThree(){
+        d3.selectAll(".disney-dot").remove()
+
         markerBubble.transition().duration(0).style("opacity",0);
         previewNameContainer.transition().duration(0).style("display","none");
         d3.select(".filters").style("visibility","visible");
@@ -1361,6 +1524,7 @@ function drawHistogram(){
                   .style("visibility","hidden")
                   ;
 
+                let eachBinMap = []  
                 d3.selectAll("#disney-cell")
                   .style("height","6px")
                   .transition()
@@ -1371,8 +1535,17 @@ function drawHistogram(){
                   .style("left",function(d){
                     return Math.floor(cx(d.female_percent)) + "px";
                   })
-                  .style("top",function(d){
-                    return "0px";
+                  .style("top",function(d,i){
+                    x = Math.floor(cx(d.female_percent))
+                    if (x in eachBinMap)
+                    {
+                      eachBinMap[x]++
+                    }
+                    else
+                    {
+                      eachBinMap[x]=0
+                    }
+                    return eachBinMap[x]*7+ "px";
                   })
                   ;
 
@@ -2272,6 +2445,8 @@ function drawHistogram(){
             });
           var leftPosition = +d3.select(element).style("left").replace("px","");
           var topPosition = +d3.select(element).style("top").replace("px","");
+
+          let topCordn = d3.select(element).node().getBoundingClientRect()
           if(+d3.select(element).style("width").replace("px","") > 2){
             markerBubble.style("left",leftPosition-3+"px").transition().duration(100).style("opacity",1);
             markerBubble.style("top",(topPosition+markerBubbleTopOffset)+"px").transition().duration(100).style("opacity",1);
@@ -4206,7 +4381,7 @@ function drawHistogram(){
     }
 
     spectrumChart();
-    // disneySample();
+    //disneySample();
     histogramThree();
     ageHistogram();
     allFilms();
