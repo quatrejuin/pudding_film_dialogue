@@ -1071,7 +1071,7 @@ function drawHistogram(){
                   })[0]
                   ;
 
-                  let eachBinMap = []  
+                  let eachBinMap = {}  
                   d3.select(".star-chart-data").selectAll(".disney-dot")
                     .data(spectrumData.filter(function(d){
                       return disneyMap.has(d.imdb_id);
@@ -1098,7 +1098,7 @@ function drawHistogram(){
                       }
                       else
                       {
-                        eachBinMap[x]=0
+                        eachBinMap[x]=1
                       }
                       return 20-eachBinMap[x]*7+ "px";
                     })
