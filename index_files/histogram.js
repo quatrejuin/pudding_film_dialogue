@@ -1104,7 +1104,7 @@ function drawHistogram(){
                     })
                     .style("margin-top","0px");
 
-                    d3.selectAll(".film-element, .disney-dot")
+                    d3.selectAll(".disney-dot")
                     .on("mouseover",function(d,i){
                       var data = d,
                           order = i,
@@ -1128,8 +1128,8 @@ function drawHistogram(){
                       {
                         if (dd.imdb_id==d.imdb_id)
                         {
-                          d3.select(this).style("background-color","rgb(36, 151, 251)")
-                          .style("height","0px")
+                          d3.select(this).style("background-color","#ffffff00")
+                          .style("height","15px")
                         }
                       })
                     })
@@ -1189,6 +1189,95 @@ function drawHistogram(){
                   midPoint.transition().duration(durationAmount).delay(delayAmount).style("left",900*(0.5)+"px").style("top",newTop+"px");
 
 
+                  let y = d3.scale.linear().domain([0,4]).range([0,60])
+                  let line = d3.svg.line()
+                  .x(function(d) { return d.x; })
+                  .y(function(d) { return 60-y(d.y); })
+                  .interpolate("basis");
+
+                  var canvas = {
+                    top: 70,
+                    right: 1000,
+                    bottom: 600,
+                    left: 0
+                  };
+
+                  let mydata = []
+
+                  mydata.push({"x":0,"y":0})
+                  for (i in eachBinMap)
+                  {
+                    mydata.push({"x":i,"y":eachBinMap[i]})
+                  }
+                  mydata.push({"x":width-2,"y":0})
+
+                  // Object.keys(eachBinMap).forEach(function(d,i)
+                  // {
+                  //   mydata.push({"x":d,"y":Object.values(eachBinMap)[i]})
+                  // })
+
+
+
+                  d3.select(".star-chart").insert("svg",".histogram-two-script-container.tk-futura-pt")
+                  .attr("width",  canvas.right - canvas.left)
+                  .attr("height", canvas.bottom - canvas.top)
+                  .attr("id", "stage1")
+                  .style("top", "0px")
+                  .style("position", "absolute")
+                  .style("z-index", -1)
+                  .append("g")
+                  .attr("transform","translate("+canvas.left+","+canvas.top+")")
+                  .selectAll("path")
+                  .data([mydata])
+                  .enter()
+                  .append("path")
+                  .attr("class","line")
+                  .attr("fill","none")
+                  .attr("stroke", "steelblue")
+                  .attr("stroke-width", "1px")
+                  .attr("stroke-linejoin", "round")
+                  .attr("stroke-linecap", "round")
+                  .attr("d",line)
+
+                  d3.selectAll("#disney-cell")
+                  .style("background-color","#ffffff00")
+                  .transition()
+                  .delay(500)
+                  .style("height","15px")
+                  d3.selectAll("#disney-cell")
+                  .on("mouseover",function(d,i){
+                    var data,
+                    order,
+                    element;
+                    d3.selectAll(".disney-dot").each(function(dd,ii)
+                    {
+                      if (dd.imdb_id==d.imdb_id)
+                      {
+                        data = dd;
+                        order = ii,
+                        element = this;
+                      }
+                    })
+                    elementMouseover(element,data,order);
+                    d3.select(this).style("background-color","#00000022")
+                  })
+                  .on("mouseout",function(d,i){
+                    var data,
+                    order,
+                    element;
+                    d3.selectAll(".disney-dot").each(function(dd,ii)
+                    {
+                      if (dd.imdb_id==d.imdb_id)
+                      {
+                        data = dd;
+                        order = ii,
+                        element = this;
+                      }
+                    })
+                    elementMouseout(element,data,order); 
+                    d3.select(this).style("background-color","#ffffff00")
+                  })
+
                   
         
                     ///////////////////////////////////////
@@ -1196,8 +1285,13 @@ function drawHistogram(){
 
       }
 
-      function stageTwo(){
+      function stageOneClean(){
         d3.selectAll(".disney-dot").remove()
+        d3.selectAll("#stage1").remove()
+      }
+
+      function stageTwo(){
+        stageOneClean()
 
         d3.select(".filters").style("visibility","visible");
         if(!mobile){
@@ -1361,7 +1455,7 @@ function drawHistogram(){
       }
 
       function stageThree(){
-        d3.selectAll(".disney-dot").remove()
+        stageOneClean()
 
         markerBubble.transition().duration(0).style("opacity",0);
         previewNameContainer.transition().duration(0).style("display","none");
@@ -1498,7 +1592,8 @@ function drawHistogram(){
       var exitOnTop1000 = new ScrollMagic.Scene({triggerElement: ".star-chart-container",duration:200,triggerHook:0, offset:200})
           // .addIndicators({name: "expand"}) // add indicators (requires plugin)
           .addTo(controller)
-          .on("enter", function (e) {
+          //.on("enter", function (e) {
+            .on("", function (e) {
             if(e.target.controller().info("scrollDirection") == "FORWARD"){
 
               if(stage == 1){
@@ -1604,7 +1699,8 @@ function drawHistogram(){
             else{
             }
           })
-          .on("leave", function(e){
+          //.on("leave", function(e){
+          .on("", function(e){
             if(e.target.controller().info("scrollDirection") == "FORWARD"){
                 stage = 2;
                 stageTwo();
